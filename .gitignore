@@ -1,0 +1,70 @@
+# ============================================================
+# Edify Monorepo .gitignore
+# ============================================================
+
+# ---- Environment ----
+.env
+.env.local
+.env.*.local
+
+# ---- Python / Backend ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.venv/
+venv/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ---- Node / Admin Web ----
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# ---- Flutter / Mobile ----
+.dart_tool/
+.packages
+build/
+*.iml
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+
+# ---- Docker ----
+docker-volumes/
+
+# ---- IDE ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- OS ----
+*.log
+*.tmp
+*.bak
+
+# ---- Storage (managed separately) ----
+storage/music/
+storage/covers/
+storage/temp/
+
+# ---- Archives ----
+*.zip
+*.tar.gz
+*.rar

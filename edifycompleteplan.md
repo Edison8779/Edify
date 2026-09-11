@@ -24,6 +24,13 @@ The FastAPI backend is the brain connecting everything.
 
 And since you want this to be ₹0 from your side, we'll design it around free/open-source software and your own machine/storage.
 
+## What Changed
+- **Multi-Quality Audio Transcoding**: Added FFmpeg-based transcoding subsystem to generate 64k, 128k, and 256k variants from a master upload.
+- **Storage Architecture**: Moved to UUID-based paths with `original/` and `variants/`.
+- **Database Schema**: Introduced `song_audio_variants` to track transcoding status.
+- **Upload Flow**: Made uploads async. The API queues Redis jobs for FFmpeg.
+- **Streaming API**: Added `quality` query parameter to the streaming endpoint.
+
 🎵 EDIFY — Complete Project Plan
 1. Final product
 
@@ -107,15 +114,20 @@ Storage
                               │
                 ┌─────────────┼─────────────┐
                 │             │             │
-                ▼             ▼             ▼
-          PostgreSQL       Redis       File Storage
-                │             │             │
-                │             │          MP3/FLAC
-                │             │          Cover Art
-                │             │
-                └─────────────┼─────────────┘
-                              ▼
-                         Audit Logs
+                 ▼             ▼             ▼
+           PostgreSQL       Redis       File Storage
+                 │             │             │
+                 │             │          Originals
+                 │             │          Variants
+                 │             │
+                 └─────────────┼─────────────┘
+                               ▼
+                   ┌───────────────────────┐
+                   │ FFmpeg Worker (Redis) │
+                   └───────────────────────┘
+                               │
+                               ▼
+                          Audit Logs
 3. Technology stack
 Android
 Kotlin
@@ -211,6 +223,7 @@ refresh_tokens
 artists
 albums
 songs
+song_audio_variants
 genres
 
 playlists
@@ -298,12 +311,21 @@ genre_id
 title
 track_number
 
-file_path
-cover_path
-
 duration
+
+song_audio_variants
+────────────────────────
+id
+song_id
+quality (original, 64k, 128k, 256k)
+codec
+bitrate
+format
+storage_key
 file_size
-mime_type
+status (PENDING, PROCESSING, READY, FAILED)
+created_at
+updated_at
 
 is_active
 
@@ -328,20 +350,28 @@ File Storage
 Example:
 
 storage/
-│
-├── music/
-│   ├── artist-001/
-│   │   ├── song-001.mp3
-│   │   └── song-002.mp3
-│   │
-│   └── artist-002/
-│       └── song-003.flac
-│
-├── covers/
-│   ├── album-001.jpg
-│   └── album-002.jpg
-│
-└── temp/
+└── songs/
+    └── {song_uuid}/
+        ├── original/
+        │   └── master.flac
+        ├── variants/
+        │   ├── 64k/
+        │   │   └── audio.mp3
+        │   ├── 128k/
+        │   │   └── audio.mp3
+        │   └── 256k/
+        │       └── audio.mp3
+        ├── cover/
+        │   └── cover.jpg
+        └── temp/
+
+10b. Audio Transcoding
+
+We use FFmpeg via a Redis-backed background worker to generate variants.
+- FastAPI accepts upload, stores in `original/`, and creates `song_audio_variants` DB records with `PENDING`.
+- FastAPI enqueues jobs to Redis and returns `201 Created` immediately.
+- Background worker processes FFmpeg tasks inside `temp/`.
+- Worker updates DB status to `PROCESSING`, then `READY` (on success) or `FAILED` (on error).
 11. Admin music upload
 
 This will be one of the most important website features.
@@ -391,9 +421,11 @@ FastAPI
    ├── Validate file
    ├── Validate metadata
    ├── Generate ID
-   ├── Save file
-   ├── Create DB record
-   └── Audit event
+   ├── Save file to `original/`
+   ├── Create DB records (`song` and `variants`)
+   ├── Queue transcoding job to Redis
+   ├── Audit event
+   └── Return Response (Async Processing)
 12. Automatic metadata extraction
 
 This is a feature I'd definitely add.
@@ -429,7 +461,7 @@ Then the admin just verifies the information.
 
 API:
 
-GET /api/v1/songs/{song_id}/stream
+GET /api/v1/songs/{song_id}/stream?quality=128k
 
 Flow:
 
@@ -474,6 +506,7 @@ Player features:
 
 Play
 Pause
+Quality Selection (Auto, Low, Med, High, Original)
 Next
 Previous
 Seek
@@ -1292,10 +1325,12 @@ Your PC
 └── Edify storage
       └── 1000 songs
 
-Android:
+Android / Public Access:
 
-        Wi-Fi
-PC ───────────────► Phone
+                     Internet (Cloudflare Tunnel / Tailscale)
+PC (Localhost) ──────────────────────────────────────────────────► Friends' Phones
+
+You can securely expose your local Caddy server to the internet for free using Cloudflare Tunnels or Tailscale. This allows your friends to install the Android app, log in, and stream music from anywhere without changing any core business logic.
 
 You don't need:
 
