@@ -1,3 +1,1 @@
-/// Edify — Auth feature placeholder.
-///
-/// Login/register screens built in Phase 5.
+export 'auth_provider.dart';

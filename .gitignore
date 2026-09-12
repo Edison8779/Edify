@@ -68,3 +68,7 @@ storage/temp/
 *.zip
 *.tar.gz
 *.rar
+
+# ---- Ignored Media ----
+backend/storage/
+backend/app/scripts/*.mp3

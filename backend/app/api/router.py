@@ -2,18 +2,19 @@
 Edify Backend — API Router.
 
 Main v1 router that aggregates all domain routers.
-Mount domain routers here as they are implemented in subsequent phases.
 """
-
-from __future__ import annotations
 
 from fastapi import APIRouter
 
+from app.api.v1 import admin, albums, artists, auth, genres, media, search, songs
+
 api_router = APIRouter(prefix="/api/v1")
 
-# Phase 2+: Include domain routers here as they are implemented
-# from app.api.v1 import auth, users, songs, artists, albums, playlists, library, history, search, admin
-# api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-# api_router.include_router(users.router, prefix="/users", tags=["Users"])
-# api_router.include_router(songs.router, prefix="/songs", tags=["Songs"])
-# etc.
+api_router.include_router(auth.router, tags=["Authentication"])
+api_router.include_router(genres.router, tags=["Genres"])
+api_router.include_router(artists.router, tags=["Artists"])
+api_router.include_router(albums.router, tags=["Albums"])
+api_router.include_router(songs.router, tags=["Songs"])
+api_router.include_router(search.router, tags=["Search"])
+api_router.include_router(admin.router, tags=["Admin"])
+api_router.include_router(media.router, tags=["Media"])

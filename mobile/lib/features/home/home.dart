@@ -1,3 +1,1 @@
-/// Edify — Home feature placeholder.
-///
-/// Home screen built in Phase 5.
+export 'home_screen.dart';

@@ -6,14 +6,12 @@ All models inherit from EdifyBase which provides:
 - created_at / updated_at timestamps
 
 Models requiring soft-delete inherit SoftDeleteMixin for `deleted_at`.
-
-Uses modern SQLAlchemy 2.x style with Mapped[] and mapped_column().
 """
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -29,8 +27,6 @@ class Base(DeclarativeBase):
 class EdifyBase(Base):
     """
     Abstract base model with UUID primary key and timestamps.
-
-    All Edify database models should inherit from this class.
     """
 
     __abstract__ = True
@@ -45,6 +41,7 @@ class EdifyBase(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
 
@@ -52,6 +49,7 @@ class EdifyBase(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
 
@@ -62,10 +60,6 @@ class EdifyBase(Base):
 class SoftDeleteMixin:
     """
     Mixin for models that support soft-delete.
-
-    Instead of DELETE FROM table, set deleted_at = now().
-    Query filters should exclude rows where deleted_at IS NOT NULL.
-    Admin can restore by setting deleted_at = NULL.
     """
 
     deleted_at: Mapped[datetime | None] = mapped_column(
