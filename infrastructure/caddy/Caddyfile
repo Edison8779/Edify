@@ -1,0 +1,26 @@
+# ============================================================
+# Edify — Caddy Reverse Proxy Configuration
+# Activated in Phase 14 (Production Deployment)
+# ============================================================
+
+# Development placeholder — Caddy will handle:
+# - HTTPS termination
+# - Reverse proxy to FastAPI
+# - Static file serving for admin-web
+# - Automatic certificate management
+
+# Example production config:
+#
+# edify.yourdomain.com {
+#     # API
+#     handle /api/* {
+#         reverse_proxy edify-api:8000
+#     }
+#
+#     # Admin Web
+#     handle {
+#         root * /srv/admin-web
+#         file_server
+#         try_files {path} /index.html
+#     }
+# }

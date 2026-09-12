@@ -1,0 +1,100 @@
+[project]
+name = "edify-backend"
+version = "0.1.0"
+description = "Edify Music Platform — FastAPI Backend"
+requires-python = ">=3.11"
+dependencies = [
+    # ---- Web Framework ----
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+
+    # ---- Database ----
+    "sqlalchemy[asyncio]>=2.0.30",
+    "asyncpg>=0.30.0",
+    "alembic>=1.13.0",
+
+    # ---- Validation & Settings ----
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.3.0",
+
+    # ---- Authentication ----
+    "python-jose[cryptography]>=3.3.0",
+    "argon2-cffi>=23.1.0",
+
+    # ---- Redis ----
+    "redis[hiredis]>=5.0.0",
+
+    # ---- File Handling ----
+    "python-multipart>=0.0.9",
+
+    # ---- Logging ----
+    "structlog>=24.1.0",
+
+    # ---- Utilities ----
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # ---- Testing ----
+    "pytest>=8.2.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+    "factory-boy>=3.3.0",
+
+    # ---- Linting & Formatting ----
+    "ruff>=0.5.0",
+    "pyright>=1.1.370",
+
+    # ---- Pre-commit ----
+    "pre-commit>=3.7.0",
+]
+
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "app",
+    "app.core",
+    "app.api",
+    "app.api.v1",
+    "app.models",
+    "app.schemas",
+    "app.services",
+    "app.repositories",
+    "app.dependencies",
+    "app.utils",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 99
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "TCH",  # flake8-type-checking
+    "RUF",  # ruff-specific rules
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

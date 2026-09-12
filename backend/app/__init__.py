@@ -1,0 +1,1 @@
+"""Edify Backend — Application package."""
