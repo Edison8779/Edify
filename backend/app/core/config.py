@@ -7,6 +7,8 @@ Never hard-code secrets. Use .env file for local development.
 
 from __future__ import annotations
 
+import os
+
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -15,7 +17,7 @@ class Settings(BaseSettings):
     """Central configuration loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "../.env"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
     backend_port: int = 8000
 
     # ---- Database ----
-    database_url: str = "postgresql+asyncpg://edify:edify_dev_password@localhost:5432/edify"
+    database_url: str = "postgresql+asyncpg://edify:12345@localhost:5435/edify"
 
     # ---- Redis ----
     redis_url: str = "redis://localhost:6379/0"
@@ -59,6 +61,14 @@ class Settings(BaseSettings):
     # ---- Logging ----
     log_level: str = "INFO"
     log_format: str = "json"
+
+    @field_validator("database_url", "redis_url", mode="after")
+    @classmethod
+    def adjust_container_urls(cls, v: str) -> str:
+        if not os.path.exists("/.dockerenv"):
+            v = v.replace("@postgres:5432/", "@localhost:5435/").replace("@postgres:", "@localhost:5435/").replace("//postgres:", "//localhost:")
+            v = v.replace("@redis:", "@localhost:").replace("//redis:", "//localhost:")
+        return v
 
     @field_validator("cors_origins", mode="before")
     @classmethod

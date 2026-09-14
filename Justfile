@@ -35,6 +35,14 @@ backend-dev:
 backend-test:
     cd backend && python -m pytest tests/ -v
 
+# Seed admin and sample catalog data
+backend-seed:
+    cd backend && python -m app.scripts.seed
+
+# Reset database and storage data
+backend-reset:
+    cd backend && python -m app.scripts.reset
+
 # Lint backend
 backend-lint:
     cd backend && ruff check . && ruff format --check .
@@ -84,6 +92,10 @@ mobile-run:
 # Build Flutter APK
 mobile-build:
     cd mobile && flutter build apk
+
+# Clean Flutter app build cache
+mobile-clean:
+    cd mobile && flutter clean
 
 # ---- Utilities ----
 

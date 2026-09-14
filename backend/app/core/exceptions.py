@@ -194,7 +194,14 @@ def register_exception_handlers(app: FastAPI) -> None:
         request: Request,
         exc: Exception,
     ) -> JSONResponse:
-        # Log the full exception for debugging — never expose to client
+        import traceback
+        try:
+            with open("error_debug.log", "a", encoding="utf-8") as f:
+                f.write(f"\n--- UNHANDLED EXCEPTION [{request.url.path}] ---\n")
+                traceback.print_exc(file=f)
+        except Exception:
+            pass
+
         logger.exception(
             "unhandled_error",
             error_type=type(exc).__name__,
@@ -205,3 +212,4 @@ def register_exception_handlers(app: FastAPI) -> None:
             code="INTERNAL_SERVER_ERROR",
             message="An unexpected error occurred.",
         )
+

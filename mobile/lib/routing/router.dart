@@ -1,3 +1,2 @@
-/// Edify — Routing configuration placeholder.
-///
-/// GoRouter configuration built in Phase 5.
+// Edify App Navigation Router
+export '../features/home/home_screen.dart';
